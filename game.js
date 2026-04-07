@@ -97,14 +97,16 @@ GHOST_BASE_SPEED = levelConfigs.normal.ghostSpeed;
 
 // Адаптація розміру поля до вікна браузера
 function adaptCanvasSize() {
-  const container = document.querySelector('.game-container');
-  const maxSize = Math.min(window.innerWidth - 40, window.innerHeight - 200) * 0.6;
-  
-  canvas.width = maxSize;
-  canvas.height = maxSize;
-  
-  tile = Math.floor(maxSize / maps.normal[0].length);
-  
+  const maxSize = Math.min(window.innerWidth - 40, window.innerHeight - 240);
+  const size = Math.max(320, Math.min(maxSize, 760));
+
+  canvas.width = size;
+  canvas.height = size;
+
+  const mapWidth = maps[currentLevel][0].length;
+  tile = Math.floor(size / mapWidth);
+  if (tile < 12) tile = 12;
+
   // Адаптація швидкостей залежно від fps
   const fpsFactor = currentFps / 60;
   PAC_SPEED = PAC_BASE_SPEED / fpsFactor;
