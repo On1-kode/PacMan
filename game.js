@@ -95,6 +95,10 @@ let selectedLevel = 'normal';
 let currentLevel = 'normal';
 GHOST_BASE_SPEED = levelConfigs.normal.ghostSpeed;
 
+function mapStringToArray(mapStrings) {
+  return mapStrings.map(row => row.split(''));
+}
+
 // Адаптація розміру поля до вікна браузера
 function adaptCanvasSize() {
   const maxSize = Math.min(window.innerWidth - 40, window.innerHeight - 240);
@@ -114,7 +118,7 @@ function adaptCanvasSize() {
 }
 
 function init() {
-  map = maps[currentLevel].slice();
+  map = mapStringToArray(maps[currentLevel]);
   pac = {
     x: 1,
     y: 1,
@@ -226,15 +230,29 @@ function getLevelGhosts(level) {
   }));
 }
 
-function updateMenuButtons() {
-  document.querySelectorAll('.level-button').forEach(btn => {
+function updateTabs() {
+  document.querySelectorAll('.tab-button').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.level === selectedLevel);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === `tab-${selectedLevel}`);
   });
 }
 
-function selectLevel(level) {
+function selectLevelTab(level) {
   selectedLevel = level;
-  updateMenuButtons();
+  updateTabs();
+}
+
+function showMenu() {
+  paused = true;
+  document.querySelector('.menu-screen').classList.remove('hidden');
+  document.querySelector('.game-screen').classList.add('hidden');
+}
+
+function showGameScreen() {
+  document.querySelector('.menu-screen').classList.add('hidden');
+  document.querySelector('.game-screen').classList.remove('hidden');
 }
 
 function startGame(level = selectedLevel) {
@@ -243,9 +261,13 @@ function startGame(level = selectedLevel) {
   GHOST_BASE_SPEED = levelConfigs[level].ghostSpeed;
   paused = false;
   init();
+  showGameScreen();
 }
 
 function restart() {
+  if (document.querySelector('.game-screen').classList.contains('hidden')) {
+    showGameScreen();
+  }
   startGame(currentLevel);
 }
 
@@ -258,10 +280,15 @@ function canMove(x, y) {
 }
 
 function remainingDots() {
-  return map
-    .join('')
-    .split('')
-    .filter(c => c === '0' || c === '2').length;
+  let count = 0;
+  for (let y = 0; y < map.length; y++) {
+    for (let x = 0; x < map[y].length; x++) {
+      if (map[y][x] === '0' || map[y][x] === '2') {
+        count++;
+      }
+    }
+  }
+  return count;
 }
 
 function drawMap() {
@@ -348,8 +375,7 @@ function updatePac(dt) {
         score += 5;
       }
 
-      map[pac.y] =
-        map[pac.y].substring(0, pac.x) + ' ' + map[pac.y].substring(pac.x + 1);
+      map[pac.y][pac.x] = ' ';
       scoreEl.textContent = score;
 
       if (remainingDots() === 0) {
@@ -431,19 +457,28 @@ window.addEventListener('keydown', e => {
 });
 
 function drawEnd() {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   ctx.fillStyle = 'white';
   ctx.font = `${Math.floor(tile * 2)}px Arial`;
   ctx.textAlign = 'center';
   
-  if (win) ctx.fillText('ТИ ВИГРАВ!', canvas.width / 2, canvas.height / 2);
-  if (gameOver) ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+  if (win) {
+    ctx.fillText('ТИ ВИГРАВ!', canvas.width / 2, canvas.height / 2);
+    ctx.font = `${Math.floor(tile * 1.2)}px Arial`;
+    ctx.fillText(`Рахунок: ${score}`, canvas.width / 2, canvas.height / 2 + tile * 2);
+  }
+  if (gameOver) {
+    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+    ctx.font = `${Math.floor(tile * 1.2)}px Arial`;
+    ctx.fillText(`Рахунок: ${score}`, canvas.width / 2, canvas.height / 2 + tile * 2);
+  }
 }
 
 // Функція для розрахунку fps та адаптації затримки
 function updateFpsCounter(dt) {
+  if (dt === 0) return;
   currentFps = 1 / dt;
   fpsHistory.push(currentFps);
   
@@ -490,8 +525,25 @@ function loop(time) {
 
   drawPac();
   drawGhosts();
+  
+  // Показуємо powered режим з помаранчевою мерехтінням
+  if (powered > 0) {
+    const blinkAlpha = (Math.sin(powered * Math.PI * 4) + 1) / 2 * 0.3;
+    ctx.fillStyle = `rgba(255, 100, 0, ${blinkAlpha})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
   if (gameOver || win) drawEnd();
+  
+  // Показуємо статус паузи
+  if (paused && !gameOver && !win) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = `${Math.floor(tile * 2)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText('ПАУЗА', canvas.width / 2, canvas.height / 2);
+  }
 
   updateFpsCounter(dt);
 
@@ -506,6 +558,6 @@ window.addEventListener('resize', () => {
 // Ініціалізація
 adaptCanvasSize();
 setupSprites();
-updateMenuButtons();
+updateTabs();
 init();
 requestAnimationFrame(loop);
