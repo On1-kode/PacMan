@@ -1,0 +1,105 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+
+class Game {
+  - context: GameContext
+  - ui: UIManager
+  - lastTime: number
+  + init()
+  + start(level)
+  + update(dt)
+  + draw()
+  + loop(time)
+}
+
+class GameContext {
+  + tile: number
+  + ctx: CanvasRenderingContext2D
+  + canvas: HTMLCanvasElement
+  + currentLevel: string
+  + score: number
+  + powered: number
+  + map: GameMap
+  + pacman: Pacman
+  + ghosts: Ghost[]
+  + ghostSprites: object
+  + bonusSprite: Image
+  + pacSpeed: number <<get>>
+  + ghostSpeed: number <<get>>
+  + isPowered: boolean <<get>>
+}
+
+class Config <<static>> {
+  + MAPS: object
+  + LEVEL_CONFIGS: object
+  + CELL_WALL: string
+  + PAC_BASE_SPEED: number
+  + GHOST_POSITIONS: object[]
+}
+
+class UIManager {
+  - game: Game
+  + appContainer: HTMLElement
+  + loadComponents()
+  + updateScore(score)
+  + updateFps(fps)
+  + showMenu()
+  + showGame()
+}
+
+class Pacman {
+  + x, y: number
+  + progress: number
+  + update(dt, context, ...)
+  + setInput(dx, dy)
+}
+
+class PacmanRenderer <<static>> {
+  + draw(ctx, pacman, context)
+}
+
+class Ghost {
+  + x, y: number
+  + color: string
+  + update(dt, context, ...)
+  + draw(ctx, context)
+}
+
+class GameMap {
+  - data: string[][]
+  + draw(ctx, context)
+  + canMove(x, y): boolean
+  + countRemainingDots(): number
+}
+
+class SpriteFactory <<static>> {
+  + createGhostSprite(color): HTMLCanvasElement
+  + createBonusSprite(): HTMLCanvasElement
+}
+
+' Relationships
+Game *-- GameContext : володіє
+Game *-- UIManager : володіє
+Game ..> SpriteFactory : використовує для ініціалізації
+Game ..> Pacman : створює
+Game ..> Ghost : створює
+Game ..> PacmanRenderer : використовує для малювання
+
+GameContext o-- Pacman : посилання
+GameContext o-- Ghost : посилання
+GameContext o-- GameMap : посилання
+
+Pacman ..> GameContext : використовує стан
+PacmanRenderer ..> Pacman : малює
+PacmanRenderer ..> GameContext : використовує налаштування
+Ghost ..> GameContext : використовує стан
+GameMap ..> GameContext : використовує стан
+
+Pacman ..> Config : використовує константи
+Ghost ..> Config : використовує константи
+GameMap ..> Config : використовує константи
+GameContext ..> Config : використовує константи
+
+@enduml
