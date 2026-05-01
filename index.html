@@ -8,51 +8,19 @@
 </head>
 <body>
   <h2>Pacman</h2>
-  <div class="menu-screen">
-    <div class="level-panel">
-      <div class="level-card">
-        <h3>Оберіть складність</h3>
-        <div class="tabs">
-          <button class="tab-button" data-level="easy" onclick="selectLevelTab('easy')">Легкий</button>
-          <button class="tab-button active" data-level="normal" onclick="selectLevelTab('normal')">Середній</button>
-          <button class="tab-button" data-level="hard" onclick="selectLevelTab('hard')">Важкий</button>
-        </div>
-        <div class="tab-panels">
-          <div class="tab-panel" id="tab-easy">
-            <p>Менше привидів, повільніша швидкість та легка карта.</p>
-            <button class="start-button" onclick="startGame('easy')">▶️ Розпочати Легкий</button>
-          </div>
-          <div class="tab-panel active" id="tab-normal">
-            <p>Збалансована складність із чотирма привидами.</p>
-            <button class="start-button" onclick="startGame('normal')">▶️ Розпочати Середній</button>
-          </div>
-          <div class="tab-panel" id="tab-hard">
-            <p>Швидші привиди, складніша карта та максимальний виклик.</p>
-            <button class="start-button" onclick="startGame('hard')">▶️ Розпочати Важкий</button>
-          </div>
-        </div>
-        <div class="menu-note">Кожна вкладка відкриває окрему інформацію для відповідного рівня.</div>
-      </div>
-    </div>
+  <div id="app">
+    <!-- Components will be loaded here -->
   </div>
-  <div class="game-screen hidden">
-    <div class="game-container">
-      <canvas id="game" width="420" height="420"></canvas>
-    </div>
-    <div class="info-panel">
-      <div class="score-container">
-        <span>Рахунок:</span>
-        <span id="score">0</span>
-      </div>
-      <div class="fps-counter" id="fps">FPS: 60</div>
-    </div>
-    <div class="controls">
-      <button onclick="restart()">🔄 Рестарт</button>
-      <button onclick="pauseGame()">⏸️ Пауза</button>
-      <button onclick="showMenu()">🏠 Меню</button>
-    </div>
-  </div>
-  <script src="game.js"></script>
+
+  <script src="js/Config.js"></script>
+  <script src="js/GameContext.js"></script>
+  <script src="js/SpriteFactory.js"></script>
+  <script src="js\GameMap.js"></script>
+  <script src="js\Pacman.js"></script>
+  <script src="js\PacmanRenderer.js"></script>
+  <script src="js\Ghost.js"></script>
+  <script src="js/UIManager.js"></script>
+  <script src="js/Game.js"></script>
 </body>
 </html>
 
